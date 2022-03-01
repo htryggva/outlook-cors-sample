@@ -4,15 +4,15 @@
  */
 
 /* global OfficeRuntime */
-import { dialogFallback } from "./fallbackauthhelper";
 import * as sso from "office-addin-sso";
-import { writeDataToOfficeDocument } from "./../taskpane/taskpane";
+import { dialogFallback } from "./fallbackauthhelper";
+import { callApi } from "./xhr";
 let retryGetAccessToken = 0;
 
-export async function getGraphData(): Promise<void> {
+export async function getGraphAccessToken(): Promise<string> {
   try {
     let bootstrapToken: string = await OfficeRuntime.auth.getAccessToken({ allowSignInPrompt: true });
-    let exchangeResponse: any = await sso.getGraphToken(bootstrapToken);
+    let exchangeResponse: any = await getGraphToken(bootstrapToken);
     if (exchangeResponse.claims) {
       // Microsoft Graph requires an additional form of authentication. Have the Office host
       // get a new token using the Claims string, which tells AAD to prompt the user for all
@@ -20,7 +20,7 @@ export async function getGraphData(): Promise<void> {
       let mfaBootstrapToken: string = await OfficeRuntime.auth.getAccessToken({
         authChallenge: exchangeResponse.claims,
       });
-      exchangeResponse = sso.getGraphToken(mfaBootstrapToken);
+      exchangeResponse = await getGraphToken(mfaBootstrapToken);
     }
 
     if (exchangeResponse.error) {
@@ -30,9 +30,7 @@ export async function getGraphData(): Promise<void> {
     } else {
       // makeGraphApiCall makes an AJAX call to the MS Graph endpoint. Errors are caught
       // in the .fail callback of that call
-      const response: any = await sso.makeGraphApiCall(exchangeResponse.access_token);
-      writeDataToOfficeDocument(response);
-      sso.showMessage("Your data has been added to the document.");
+      return exchangeResponse.access_token;
     }
   } catch (exception) {
     // if handleClientSideErrors returns true then we will try to authenticate via the fallback
@@ -42,9 +40,17 @@ export async function getGraphData(): Promise<void> {
         dialogFallback();
       }
     } else {
-      sso.showMessage("EXCEPTION: " + JSON.stringify(exception));
+      throw exception;
     }
   }
+}
+
+async function getGraphToken(bootstrapToken: string) {
+  const jsonResponse = await callApi(`https://INSERT_TOKEN_EXCHANGE_SERVER/api/auth?token=${bootstrapToken}`, {
+    method: "GET",
+  });
+
+  return JSON.parse(jsonResponse);
 }
 
 function handleAADErrors(exchangeResponse: any): void {
@@ -56,7 +62,7 @@ function handleAADErrors(exchangeResponse: any): void {
 
   if (exchangeResponse.error_description.indexOf("AADSTS500133") !== -1 && retryGetAccessToken <= 0) {
     retryGetAccessToken++;
-    getGraphData();
+    getGraphAccessToken();
   } else {
     dialogFallback();
   }

@@ -4,35 +4,24 @@
  */
 
 /* global $, document, Office */
-
-import { getGraphData } from "./../helpers/ssoauthhelper";
+import * as sso from "office-addin-sso";
+import { getGraphAccessToken } from "../helpers/ssoauthhelper";
+import { fetchDataAndInsertSignature } from "../shared/signature";
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     $(document).ready(function () {
-      $("#getGraphDataButton").click(getGraphData);
+      $("#getGraphDataButton").click(getGraphDataHandler);
     });
   }
 });
 
-export function writeDataToOfficeDocument(result: Object): void {
-  let data: string[] = [];
-  let userProfileInfo: string[] = [];
-  userProfileInfo.push(result["displayName"]);
-  userProfileInfo.push(result["jobTitle"]);
-  userProfileInfo.push(result["mail"]);
-  userProfileInfo.push(result["mobilePhone"]);
-  userProfileInfo.push(result["officeLocation"]);
-
-  for (let i = 0; i < userProfileInfo.length; i++) {
-    if (userProfileInfo[i] !== null) {
-      data.push(userProfileInfo[i]);
-    }
+async function getGraphDataHandler() {
+  try {
+    const accessToken = await getGraphAccessToken();
+    await fetchDataAndInsertSignature(accessToken);
+    sso.showMessage("Your data has been added to the document.");
+  } catch (exception) {
+    sso.showMessage("EXCEPTION: " + JSON.stringify(exception));
   }
-
-  let userInfo: string = "";
-  for (let i = 0; i < data.length; i++) {
-    userInfo += data[i] + "\n";
-  }
-  Office.context.mailbox.item.body.setSelectedDataAsync(userInfo, { coercionType: Office.CoercionType.Html });
 }

@@ -3,6 +3,10 @@
  * See LICENSE in the project root for license information.
  */
 
+import { log, logObject } from "../helpers/debug";
+import { getGraphAccessToken } from "../helpers/ssoauthhelper";
+import { fetchDataAndInsertSignature } from "../shared/signature";
+
 /* global global, Office, self, window */
 
 Office.onReady(() => {
@@ -28,26 +32,15 @@ export function action(event: Office.AddinCommands.Event) {
   event.completed();
 }
 
-function onMessageComposeHandler(event) {
-  setSubject(event);
-}
-
-function setSubject(event) {
-  Office.context.mailbox.item.subject.setAsync(
-    "Set by an event-based add-in!",
-    {
-      asyncContext: event,
-    },
-    function (asyncResult) {
-      // Handle success or error.
-      if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
-        console.error("Failed to set subject: " + JSON.stringify(asyncResult.error));
-      }
-
-      // Call event.completed() after all work is done.
-      asyncResult.asyncContext.completed();
-    }
-  );
+async function onMessageComposeHandler(event) {
+  try {
+    const accessToken = await getGraphAccessToken();
+    await fetchDataAndInsertSignature(accessToken);
+  } catch (error) {
+    log("error");
+    logObject(error);
+  }
+  event.completed();
 }
 
 function getGlobal() {
