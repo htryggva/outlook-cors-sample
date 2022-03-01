@@ -10,14 +10,14 @@
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-128.png"/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
-    <AppDomain>https://www.contoso.com</AppDomain>
+    <AppDomain>https://localhost:3000</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Mailbox"/>
   </Hosts>
   <Requirements>
     <Sets>
-      <Set Name="MailBox" MinVersion="1.1"/>
+      <Set Name="MailBox" MinVersion="1.10"/>
     </Sets>
   </Requirements>
   <FormSettings>
@@ -37,6 +37,14 @@
     <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.1" xsi:type="VersionOverridesV1_1">
       <Hosts>
         <Host xsi:type="MailHost">
+          <Runtimes>
+          <!-- HTML file including reference to or inline JavaScript event handlers.
+               This is used by Outlook on the web and Outlook on the new Mac UI preview. -->
+          <Runtime resid="WebViewRuntime.Url">
+            <!-- JavaScript file containing event handlers. This is used by Outlook Desktop. -->
+            <Override type="javascript" resid="JSRuntime.Url"/>
+          </Runtime>
+          </Runtimes>
           <DesktopFormFactor>
             <ExtensionPoint xsi:type="MessageComposeCommandSurface">
               <OfficeTab id="TabHome">
@@ -60,6 +68,15 @@
                 </Group>
               </OfficeTab>
             </ExtensionPoint>
+
+          <!-- Enable launching the add-in on the included events. -->
+          <ExtensionPoint xsi:type="LaunchEvent">
+            <LaunchEvents>
+              <LaunchEvent Type="OnNewMessageCompose" FunctionName="onMessageComposeHandler"/>
+            </LaunchEvents>
+            <!-- Identifies the runtime to be used (also referenced by the Runtime element). -->
+            <SourceLocation resid="WebViewRuntime.Url"/>
+          </ExtensionPoint>
           </DesktopFormFactor>
         </Host>
       </Hosts>
@@ -72,6 +89,9 @@
         <bt:Urls>
           <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
           <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
+          <bt:Url id="WebViewRuntime.Url" DefaultValue="https://localhost:3000/commands.html" />
+          <!-- Entry needed for Outlook Desktop. -->
+          <bt:Url id="JSRuntime.Url" DefaultValue="https://localhost:3000/commands.js" />
         </bt:Urls>
         <bt:ShortStrings>
           <bt:String id="GetStarted.Title" DefaultValue="Get started with your sample add-in!"/>

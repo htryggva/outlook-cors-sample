@@ -28,6 +28,28 @@ export function action(event: Office.AddinCommands.Event) {
   event.completed();
 }
 
+function onMessageComposeHandler(event) {
+  setSubject(event);
+}
+
+function setSubject(event) {
+  Office.context.mailbox.item.subject.setAsync(
+    "Set by an event-based add-in!",
+    {
+      asyncContext: event,
+    },
+    function (asyncResult) {
+      // Handle success or error.
+      if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
+        console.error("Failed to set subject: " + JSON.stringify(asyncResult.error));
+      }
+
+      // Call event.completed() after all work is done.
+      asyncResult.asyncContext.completed();
+    }
+  );
+}
+
 function getGlobal() {
   return typeof self !== "undefined"
     ? self
@@ -42,3 +64,6 @@ const g = getGlobal() as any;
 
 // The add-in command functions need to be available in global scope
 g.action;
+g.onMessageComposeHandler;
+
+Office.actions.associate("onMessageComposeHandler", onMessageComposeHandler);
