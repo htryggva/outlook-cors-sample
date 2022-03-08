@@ -33,11 +33,11 @@ export async function getGraphAccessToken(): Promise<string> {
     let bootstrapToken: string = await OfficeRuntime.auth.getAccessToken({ allowSignInPrompt: true });
 
     /*
-    [Step 3] - Get Graph token
-    ========================
+    [Step 3] - Get MS Graph token
+    =============================
     
     - Token exchange is based on OAuth2 on-behalf-of flow
-    - Requres a web secret that knows the client secret for the add-in client id (which is created during SSO setup)
+    - Requires a web server that knows the client secret for the add-in client id (which is created during SSO setup)
     - This example uses the office-addin-sso NPM package to host a **local** node.js server that handles token exchange
 
     [office-addin-sso authentication backend implementation](https://github.com/OfficeDev/Office-Addin-Scripts/blob/master/packages/office-addin-sso/src/authRoute.ts)
