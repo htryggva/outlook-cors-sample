@@ -2,6 +2,10 @@
 
 This repository contains an example Outlook add-in that uses event-based activation to authenticate the user, get user data from the Microsoft Graph using CORS and insert the information into the signature of the email.
 
+## Overview
+
+![Overview!](/overview.png)
+
 ## Setup
 
 Replace instances of `INSERT_CLIENT_ID` with your App Registration ID.
