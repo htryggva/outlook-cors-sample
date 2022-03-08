@@ -1,4 +1,4 @@
-/* global Office */
+/* global console */
 export const logObject = (obj: Record<string, unknown>): void => {
   const props = Object.getOwnPropertyNames(obj);
   const objStringified = props.reduce((acc, prop) => {
@@ -9,16 +9,6 @@ export const logObject = (obj: Record<string, unknown>): void => {
   log(objStringified);
 };
 
-export function log(text) {
-  return new Promise((resolve) => {
-    Office.context.mailbox.item.body.prependAsync(
-      `${text}\n`,
-      {
-        coercionType: Office.CoercionType.Text,
-      },
-      (asyncResult) => {
-        resolve(asyncResult.value);
-      }
-    );
-  });
+export function log(text: string) {
+  console.log(`[outlook-cors-sample] ${text}`);
 }

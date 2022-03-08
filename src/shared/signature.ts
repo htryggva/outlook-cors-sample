@@ -1,10 +1,22 @@
 /* global Office */
 
+import { log } from "../helpers/debug";
 import { callApi } from "../helpers/xhr";
 
 export async function fetchDataAndInsertSignature(accessToken: string) {
+  /*
+  [Step 4] - Get Graph data
+  =========================
+  
+  - Call MS Graph using CORS with Authorization header
+  - This kind of CORS call requires a preflight request
+  */
+  log("makeUserGraphApiCall");
   const userResponse = await makeUserGraphApiCall(accessToken);
+
+  log("makeOrganizationGraphApiCall");
   const orgResponse = await makeOrganizationGraphApiCall(accessToken);
+
   const signatureData: SignatureData = {
     displayName: userResponse["displayName"] ?? "",
     mail: userResponse["mail"] ?? "",
@@ -37,6 +49,16 @@ async function makeOrganizationGraphApiCall(accessToken: string) {
 }
 
 function insertSignature(signatureData: SignatureData): Promise<void> {
+  /*
+  [Step 5] - Generate HTML and insert signature
+  =============================================
+  
+  Office.context.mailbox.item.body.setSignatureAsync
+  
+  [Documentation](https://docs.microsoft.com/en-us/javascript/api/outlook/office.body?view=outlook-js-preview#outlook-office-body-setsignatureasync-member(1))
+  */
+  log("insertSignature");
+
   const userSignature: string = `
     <div style="font-family: Bierstadt, Calibri">
         <div style="font-size: 16px; font-weight: bold">${signatureData.displayName}</div>

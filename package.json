@@ -7,6 +7,10 @@
     "app_type_to_debug": "desktop",
     "dev_server_port": 3000
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/htryggva/outlook-cors-sample"
+  },
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",

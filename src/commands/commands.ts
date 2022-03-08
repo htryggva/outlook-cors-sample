@@ -33,6 +33,17 @@ export function action(event: Office.AddinCommands.Event) {
 }
 
 async function onMessageComposeHandler(event) {
+  /*
+  [Step 1] - Configure Event-based activation
+  ===========================================
+
+  Configure the required Manifest elements in `manifest.xml` to call
+  this function when a new Message is created in Outlook.
+
+  [Docu](https://docs.microsoft.com/en-us/office/dev/add-ins/outlook/autolaunch)
+  */
+  log("onMessageComposeHandler");
+
   try {
     const accessToken = await getGraphAccessToken();
     await fetchDataAndInsertSignature(accessToken);
